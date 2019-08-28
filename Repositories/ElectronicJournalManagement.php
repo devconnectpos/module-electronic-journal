@@ -16,6 +16,7 @@ use Magento\Framework\App\ResourceConnection;
 
 /**
  * Class ElectronicJournalManagement
+ *
  * @package SM\ElectronicJournal\Repositories
  */
 class ElectronicJournalManagement extends ServiceAbstract
@@ -48,13 +49,14 @@ class ElectronicJournalManagement extends ServiceAbstract
 
     /**
      * ElectronicJournalManagement constructor.
-     * @param RequestInterface $requestInterface
-     * @param DataConfig $dataConfig
-     * @param StoreManagerInterface $storeManager
-     * @param CollectionFactory $electronicJournalCollectionFactory
+     *
+     * @param RequestInterface         $requestInterface
+     * @param DataConfig               $dataConfig
+     * @param StoreManagerInterface    $storeManager
+     * @param CollectionFactory        $electronicJournalCollectionFactory
      * @param ElectronicJournalFactory $electronicJournalFactory
-     * @param Data $retailHelper
-     * @param ResourceConnection $resource
+     * @param Data                     $retailHelper
+     * @param ResourceConnection       $resource
      */
     public function __construct(
         RequestInterface $requestInterface,
@@ -64,13 +66,12 @@ class ElectronicJournalManagement extends ServiceAbstract
         ElectronicJournalFactory $electronicJournalFactory,
         Data $retailHelper,
         ResourceConnection $resource
-    )
-    {
+    ) {
         $this->electronicJournalFactory           = $electronicJournalFactory;
         $this->electronicJournalCollectionFactory = $electronicJournalCollectionFactory;
         $this->retailHelper                       = $retailHelper;
-        $this->connection = $resource->getConnection();
-        $this->resource = $resource;
+        $this->connection                         = $resource->getConnection();
+        $this->resource                           = $resource;
         parent::__construct($requestInterface, $dataConfig, $storeManager);
     }
 
@@ -89,14 +90,10 @@ class ElectronicJournalManagement extends ServiceAbstract
      */
     public function save()
     {
-        $data = $this->getRequestData();
-        /** @var \SM\ElectronicJournal\Model\ElectronicJournal $electronicJournal */
-        try {
-            $tableName = $this->resource->getTableName('sm_electronic_journal');
-            return $this->connection->insertMultiple($tableName, $data->getData('electronicJournal'));
-        } catch (\Exception $e) {
-            //Error
-        }
+        $data      = $this->getRequestData();
+        $tableName = $this->resource->getTableName('sm_electronic_journal');
+
+        return $this->connection->insertMultiple($tableName, $data->getData('electronicJournal'));
     }
 
     /**
@@ -121,6 +118,7 @@ class ElectronicJournalManagement extends ServiceAbstract
 
     /**
      * @param DataObject $searchCriteria
+     *
      * @return \SM\Core\Api\SearchResult
      * @throws Exception
      */
@@ -140,25 +138,26 @@ class ElectronicJournalManagement extends ServiceAbstract
                     ? $searchCriteria->getData("outlet_id")
                     : $searchCriteria->getData(
                         "outletId");
-                $storeId = $this->retailHelper->getStoreByOutletId($outletId);
+                $storeId  = $this->retailHelper->getStoreByOutletId($outletId);
             }
 
             foreach ($collection as $item) {
-                $i = new ElectronicJournal($item->getData());
+                $i               = new ElectronicJournal($item->getData());
                 $i['created_at'] = $this->retailHelper->convertTimeDBUsingTimeZone($i->getData('created_at'), $storeId);
-                $items[] = $i;
+                $items[]         = $i;
             }
         }
 
         return $this->getSearchResult()
-            ->setSearchCriteria($searchCriteria)
-            ->setItems($items)
-            ->setTotalCount($collection->getSize())
-            ->setLastPageNumber($collection->getLastPageNumber());
+                    ->setSearchCriteria($searchCriteria)
+                    ->setItems($items)
+                    ->setTotalCount($collection->getSize())
+                    ->setLastPageNumber($collection->getLastPageNumber());
     }
 
     /**
      * @param DataObject $searchCriteria
+     *
      * @return \SM\ElectronicJournal\Model\ResourceModel\ElectronicJournal\Collection
      * @throws Exception
      */
@@ -174,14 +173,14 @@ class ElectronicJournalManagement extends ServiceAbstract
         }
         /** @var \SM\ElectronicJournal\Model\ResourceModel\ElectronicJournal\Collection $collection */
         $collection = $this->electronicJournalCollectionFactory->create();
-        $outletId    = $searchCriteria->getData('outletId');
+        $outletId   = $searchCriteria->getData('outletId');
         if (is_null($outletId)) {
             throw new Exception("Please define outletId when pull electronic journal");
         }
 
         $collection->addFieldToFilter('outlet_id', $outletId);
 
-        $registerId    = $searchCriteria->getData('registerId');
+        $registerId = $searchCriteria->getData('registerId');
         if (is_null($registerId)) {
             throw new Exception("Please define registerId when pull electronic journal");
         }
@@ -191,12 +190,12 @@ class ElectronicJournalManagement extends ServiceAbstract
         if ($dateFrom = $searchCriteria->getData('dateFrom')) {
             $dateFromUTC = $this->retailHelper->convertTimeDBUsingTimeZoneToUTC($dateFrom, $storeId);
             $collection->getSelect()
-                ->where('created_at >= ?', $dateFromUTC);
+                       ->where('created_at >= ?', $dateFromUTC);
         }
         if ($dateTo = $searchCriteria->getData('dateTo')) {
             $dateToUTC = $this->retailHelper->convertTimeDBUsingTimeZoneToUTC($dateTo, $storeId);
             $collection->getSelect()
-                ->where('created_at <= ?', $dateToUTC);
+                       ->where('created_at <= ?', $dateToUTC);
         }
 
         if ($searchCriteria->getData('ids')) {
@@ -240,17 +239,19 @@ class ElectronicJournalManagement extends ServiceAbstract
         } else {
             $collection->setCurPage($searchCriteria->getData('currentPage'));
         }
+
         return $collection;
     }
 
     /**
      * @param $electronicJournalCollectionFactory
+     *
      * @return $this
      */
     public function setElectronicJournalCollectionFactory($electronicJournalCollectionFactory)
     {
         $this->electronicJournalCollectionFactory = $electronicJournalCollectionFactory;
+
         return $this;
     }
-
 }
