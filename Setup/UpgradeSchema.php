@@ -14,6 +14,7 @@ use Magento\Framework\Setup\UpgradeSchemaInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
 use Magento\Sales\Model\OrderFactory;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @codeCoverageIgnore
@@ -26,11 +27,21 @@ class UpgradeSchema implements UpgradeSchemaInterface
      */
     public function upgrade(SchemaSetupInterface $setup, ModuleContextInterface $context)
     {
-        $installer = $setup;
-        $installer->startSetup();
         if (version_compare($context->getVersion(), '0.0.1', '<')) {
             $this->addElectronicJournal($setup);
         }
+    }
+
+    /**
+     * @param SchemaSetupInterface $setup
+     * @param OutputInterface      $output
+     *
+     * @throws \Zend_Db_Exception
+     */
+    public function execute(SchemaSetupInterface $setup, OutputInterface $output)
+    {
+        $output->writeln('  |__ Add electronic journal table');
+        $this->addElectronicJournal($setup);
     }
 
     /**
@@ -39,13 +50,16 @@ class UpgradeSchema implements UpgradeSchemaInterface
      */
     protected function addElectronicJournal(SchemaSetupInterface $setup)
     {
-        $installer = $setup;
-        $installer->startSetup();
-        if ($setup->getConnection()->isTableExists($installer->getTable('sm_electronic_journal'))) {
-            $installer->endSetup();
+        $setup->startSetup();
+
+        if ($setup->getConnection()->isTableExists($setup->getTable('sm_electronic_journal'))) {
+            $setup->endSetup();
+
+            return;
         }
-        $table = $installer->getConnection()->newTable(
-            $installer->getTable('sm_electronic_journal')
+
+        $table = $setup->getConnection()->newTable(
+            $setup->getTable('sm_electronic_journal')
         )->addColumn(
             'id',
             Table::TYPE_INTEGER,
@@ -101,9 +115,9 @@ class UpgradeSchema implements UpgradeSchemaInterface
             ['nullable' => false, 'default' => Table::TIMESTAMP_INIT],
             'Created At'
         );
-        $installer->getConnection()->createTable($table);
 
-        $installer->endSetup();
+        $setup->getConnection()->createTable($table);
+        $setup->endSetup();
     }
 
 }
