@@ -199,21 +199,21 @@ class ElectronicJournalManagement extends ServiceAbstract
         }
 
         if ($searchCriteria->getData('ids')) {
-            $collection->addFieldToFilter('id', ['in' => explode(",", $searchCriteria->getData('ids'))]);
+            $collection->addFieldToFilter('id', ['in' => explode(",", (string)$searchCriteria->getData('ids'))]);
         }
 
         if (!is_null($searchCriteria->getData('searchEventType'))
             && $searchCriteria->getData('searchEventType') !== 'null'
             && $searchCriteria->getData('searchEventType') !== 'all'
             && $searchCriteria->getData('searchEventType') !== '') {
-            $collection->addFieldToFilter('event_type', ['in' => explode(",", $searchCriteria->getData('searchEventType'))]);
+            $collection->addFieldToFilter('event_type', ['in' => explode(",", (string)$searchCriteria->getData('searchEventType'))]);
         }
 
         if (!is_null($searchCriteria->getData('searchEmployee'))
             && $searchCriteria->getData('searchEmployee') !== 'null'
             && $searchCriteria->getData('searchEmployee') !== 'all'
             && $searchCriteria->getData('searchEmployee') !== '') {
-            $collection->addFieldToFilter('employee_id', ['in' => explode(",", $searchCriteria->getData('searchEmployee'))]);
+            $collection->addFieldToFilter('employee_id', ['in' => explode(",", (string)$searchCriteria->getData('searchEmployee'))]);
         }
 
         if ($searchString = $searchCriteria->getData('searchString')) {
@@ -225,7 +225,7 @@ class ElectronicJournalManagement extends ServiceAbstract
             ];
             $collection->addFieldToFilter($fieldSearch, $fieldSearchValue);
         }
-        if (is_nan($searchCriteria->getData('pageSize'))) {
+        if (is_nan((float)$searchCriteria->getData('pageSize'))) {
             $collection->setPageSize(
                 DataConfig::PAGE_SIZE_LOAD_DATA
             );
@@ -234,7 +234,7 @@ class ElectronicJournalManagement extends ServiceAbstract
                 $searchCriteria->getData('pageSize')
             );
         }
-        if (is_nan($searchCriteria->getData('currentPage'))) {
+        if (is_nan((float)$searchCriteria->getData('currentPage'))) {
             $collection->setCurPage(1);
         } else {
             $collection->setCurPage($searchCriteria->getData('currentPage'));
